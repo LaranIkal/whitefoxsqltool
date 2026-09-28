@@ -1,0 +1,9 @@
+
+
+===>>> 2021/June/25 --- Version 1.0 INITIAL RELEASE, READ FILE: ReadmeFirst.txt
+
+===>>> 2026/September/26 --- Version 2.0 
+ - All JavaScript files extensions and references changed to .jss, READ FILE: ReadmeFirst.txt
+ - GraalVM Polytglot engine loaded at the first time a .jss files is executed, the reuse it for context evaluation.
+ - New more reliable methods on Linux and Windows to start and stop jswebserver
+
