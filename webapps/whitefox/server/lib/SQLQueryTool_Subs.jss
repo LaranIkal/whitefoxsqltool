@@ -40,8 +40,8 @@ function QueryMainScreen(sqlQueryID, dataSourceID, fSeparator, fEnclosed, sqlScr
     }
 
   } finally {
-      if (resultSet) try { resultSet.close() } catch(e) {}
-      if (stmt) try { stmt.close()} catch (e) { print( e ) }
+    if( resultSet ) try { resultSet.close() } catch(e) {}
+    if( stmt ) try { stmt.close()} catch (e) { print( e ) }
   }
   
   qtHtml += "</select></div></td><td>\n\
@@ -50,7 +50,7 @@ function QueryMainScreen(sqlQueryID, dataSourceID, fSeparator, fEnclosed, sqlScr
   qtHtml += "onclick='JavaScript:xmlhttpPostScriptData(\"/whitefox/server/index.jss\",this.form,\"ResultsPane\",\"Delete\", \"0\")'></td></tr></table>\n\
     </form></td><td>\n"
 
-  if(dataSourceID === "") dataSourceID = defaultDataSource
+  if( dataSourceID === "" ) dataSourceID = defaultDataSource
 
   qtHtml += "<form id=\"MainQuery\" name=\"EditQuery\" action=\"/whitefox/server/index.jss\" method=\"post\">\n\
     <input type=\"hidden\" name=\"option\" value=\"execquery\">\n\
@@ -78,15 +78,15 @@ function QueryMainScreen(sqlQueryID, dataSourceID, fSeparator, fEnclosed, sqlScr
     var stmt = conn.prepareStatement(selectQuery)
     var resultSet = stmt.executeQuery()
 
-    while (resultSet.next()) {
+    while( resultSet.next() ) {
       var sel = " "
       if( dataSourceID === resultSet.getString(1) ) sel = " selected "
       qtHtml += "<option" + sel + "value=\"" + resultSet.getString(1) + "\">" + resultSet.getString(1) + " - " + resultSet.getString(2) + "</option>\n"           
     }
   } finally {
-      if (resultSet) try { resultSet.close() } catch(e) {}
-      if (stmt) try { stmt.close()} catch (e) { print( e ) }
-      if (conn) try { conn.close() } catch (e) { print( e ) } // Close connection in the last query.
+    if( resultSet ) try { resultSet.close() } catch(e) {}
+    if( stmt ) try { stmt.close()} catch (e) { print( e ) }
+    if( conn ) try { conn.close() } catch (e) { print( e ) } // Close connection in the last query.
   }
   
 
@@ -203,12 +203,13 @@ function ExecuteQuery( dataSourceID, sqlScript, showRecordsCount, minRecordNum, 
         dataSourceName = resultSet.getString(1)
         dataSourceScript = resultSet.getString(2)
       }
-    } catch (javaSQLException) {
-      throw "<p style=\"color:red\"><b>Problem Running Query to Get Data Source: " + selectQuery + "</b></p>"
+    } catch( javaSQLException ) {
+      let exception = "<p style=\"color:red\"><b>Problem Running Query to Get Data Source: " + selectQuery + "</b></p>\n\n" + javaSQLException
+      return exception
     } finally {
-      if (resultSet) try { resultSet.close() } catch(e) {}
-      if (stmt) try { stmt.close()} catch (e) { print( e ) }
-      if (dsConn) try { dsConn.close()} catch (e) { print( e ) }
+      if( resultSet ) try { resultSet.close() } catch(e) {}
+      if( stmt ) try { stmt.close() } catch (e) { print( e ) }
+      if( dsConn ) try { dsConn.close() } catch (e) { print( e ) }
     }
 
     // Getting Database Connection
@@ -216,16 +217,18 @@ function ExecuteQuery( dataSourceID, sqlScript, showRecordsCount, minRecordNum, 
     var customConn = null
     try {
       customConn = GetCustomDSConnection()
-    } catch (javaSQLException) {
-      throw "<p style=\"color:red\"><b>Data Source Connection Script Error, Verify Your Code:</b> " + dataSourceScript + "</p>"
+    } catch( javaSQLException ) {
+      let exception = "<p style=\"color:red\"><b>Data Source Connection Script Error, Verify Your Code:</b> " + dataSourceScript + "</p>\n\n" + javaSQLException
+      return exception
     }
     
     if( queryInstruction == "2" ) {
       try {
         var stmt = customConn.createStatement()
         stmt.execute(sqlScript)
-      } catch (javaSQLException) {
-        throw "<p style=\"color:red\"><b>Problem Running Query: " + sqlScript + "</b><br>Check your query an try again.</br></p>"
+      } catch( javaSQLException ) {
+        let exception = "<p style=\"color:red\"><b>Problem Running Query: " + sqlScript + "</b><br>Check your query an try again.</br></p>\n\n" + javaSQLException
+        return exception
       } finally {
         if (stmt) try { stmt.close() } catch (e) { throw( e ) }
         if (customConn) try { customConn.close() } catch (e) { throw( e ) }             
@@ -277,21 +280,21 @@ function ExecuteQuery( dataSourceID, sqlScript, showRecordsCount, minRecordNum, 
 
             var fieldsCount = 0
             for( fieldsCount = 1; fieldsCount <= columnCount; fieldsCount++ ) {
-                fieldValue = resultSet.getString(fieldsCount)
-                if(fieldValue === null ) {
-                  fieldValue = ""
-                } else {
-                  fieldValue = fieldValue.replaceAll("\r\n", "<br>")
-                  fieldValue = fieldValue.replaceAll("\n", "<br>")                
-                  fieldValue = fieldValue.replaceAll(" ","&nbsp")
-                }
-                
-                if( recordsCount % 2 == 0 ) {
-                  reportRecords += "<td class=\"evensqlresults\">"
-                } else {
-                  reportRecords += "<td class=\"oddsqlresults\">"
-                }
-                reportRecords += fieldValue + "</td>"
+              fieldValue = resultSet.getString(fieldsCount)
+              if( fieldValue === null ) {
+                fieldValue = ""
+              } else {
+                fieldValue = fieldValue.replaceAll("\r\n", "<br>")
+                fieldValue = fieldValue.replaceAll("\n", "<br>")                
+                fieldValue = fieldValue.replaceAll(" ","&nbsp")
+              }
+              
+              if( recordsCount % 2 == 0 ) {
+                reportRecords += "<td class=\"evensqlresults\">"
+              } else {
+                reportRecords += "<td class=\"oddsqlresults\">"
+              }
+              reportRecords += fieldValue + "</td>"
             }
             reportRecords += "</tr>\n"
 
@@ -336,19 +339,20 @@ function ExecuteQuery( dataSourceID, sqlScript, showRecordsCount, minRecordNum, 
           if (cresultSet.next()) execQueryMsg += "<p><b>Records found:</b> " + cresultSet.getInt(1) + "</p>"
         }
 
-      } catch (javaSQLException) {
-        throw "<p style=\"color:red\"><b>Problem Running Query: " + sqlScript + "</b><br>Check your query an try again.</br></p>"
+      } catch( javaSQLException ) {
+        let exception = "<p style=\"color:red\"><b>Problem Running Query: " + sqlScript + "</b><br>Check your query an try again.</br></p>\n\n" + javaSQLException
+        return exception
       } finally {
-          if (resultSet) try { resultSet.close() } catch(e) {}
-          if (stmt) try { stmt.close()} catch (e) { print( e ) }
-          if (customConn) try { customConn.close()} catch (e) { print( e ) }
+        if( resultSet ) try { resultSet.close() } catch(e) {}
+        if( stmt ) try { stmt.close()} catch (e) { print( e ) }
+        if( customConn ) try { customConn.close()} catch (e) { print( e ) }
       }
     }
     
   }
 
 
-  return(execQueryMsg)
+  return( execQueryMsg )
 }
 
 
@@ -372,10 +376,10 @@ function SaveQuery( sqlQueryID, dataSourceID, sqlQueryName, sqlScript) {
     try {
       var stmt = connSave.prepareStatement(selectQuery)
       var resultSet = stmt.executeQuery()
-      if (resultSet.next()) numRows = resultSet.getInt(1)
+      if( resultSet.next() ) numRows = resultSet.getInt(1)
     } finally {
-      if (resultSet) try { resultSet.close() } catch(e) {}
-      if (stmt) try { stmt.close()} catch (e) { print( e ) }
+      if( resultSet ) try { resultSet.close() } catch(e) {}
+      if( stmt ) try { stmt.close()} catch (e) { print( e ) }
     }
     if( numRows > 0 ) error += "SQL Script Name Already Exists, Please Enter a Different Name.<br>"
   }
@@ -397,11 +401,12 @@ function SaveQuery( sqlQueryID, dataSourceID, sqlQueryName, sqlScript) {
     try {
       var stmt = connSave.prepareStatement(sqlInsertQuery)
       stmt.executeUpdate()
-    } catch (javaSQLException) {
-      if(connSave) try { connSave.close() } catch (e) { print( e ) } // Close db connection
-      throw "<p style=\"color:red\"><b>Problem Running Query When Creating/Updating SQL Script: " + sqlInsertQuery + "</b></p>"
+    } catch( javaSQLException ) {
+      if( connSave ) try { connSave.close() } catch (e) { print( e ) } // Close db connection
+      let exception = "<p style=\"color:red\"><b>Problem Running Query When Creating/Updating SQL Script: " + sqlInsertQuery + "</b></p>\n\n" + javaSQLException
+      return exception
     } finally {      
-      if (stmt) try { stmt.close() } catch (e) { print( e ) }        
+      if( stmt ) try { stmt.close() } catch (e) { print( e ) }        
     }
 
     sqlQuerySaveMsg = "SQL Query Saved, " // Initialize return message.
@@ -412,10 +417,10 @@ function SaveQuery( sqlQueryID, dataSourceID, sqlQueryName, sqlScript) {
       try {
         var stmt = connSave.prepareStatement(selectQuery)
         var resultSet = stmt.executeQuery()
-        if (resultSet.next()) sqlQueryID = resultSet.getString(1)
+        if( resultSet.next() ) sqlQueryID = resultSet.getString(1)
       } finally {
-          if (resultSet) try { resultSet.close() } catch(e) {}
-          if (stmt) try { stmt.close() } catch (e) { print( e ) }
+          if( resultSet ) try { resultSet.close() } catch(e) {}
+          if( stmt ) try { stmt.close() } catch (e) { print( e ) }
       }      
       
     }
@@ -426,9 +431,9 @@ function SaveQuery( sqlQueryID, dataSourceID, sqlQueryName, sqlScript) {
     sqlQuerySaveMsg = error + "Date/Time: " + GetDateTime() // Utils.GetDateTime
   }
 
-  if(connSave) try { connSave.close() } catch (e) { print( e ) } // Close db connection
+  if( connSave ) try { connSave.close() } catch (e) { print( e ) } // Close db connection
 
-  return(sqlQuerySaveMsg)
+  return( sqlQuerySaveMsg )
 }
 
 
@@ -449,19 +454,19 @@ function RefreshQueryList(sqlQueryID) {
     var stmt = conn.prepareStatement(selectQuery)
     var resultSet = stmt.executeQuery()
 
-    while (resultSet.next()) {
+    while( resultSet.next() ) {
       var sel = " "
       if( sqlQueryID === resultSet.getString(1) ) sel = " selected "
       qtHtml += "<option" + sel + "value=\"" + resultSet.getString(1) + "\">" + resultSet.getString(2) + "</option>\n"           
     }
   } finally {
-    if (resultSet) try { resultSet.close() } catch(e) {}
-    if (stmt) try { stmt.close() } catch (e) { print( e ) }
+    if( resultSet ) try { resultSet.close() } catch(e) {}
+    if( stmt ) try { stmt.close() } catch (e) { print( e ) }
   }
 
   qtHtml += "</select>\n"
 
-  return(qtHtml)
+  return( qtHtml )
 }
 
 
@@ -475,11 +480,12 @@ function DeleteQuery(sqlQueryID) {
   try {
     var stmt = connDelete.prepareStatement(sqlDeleteQuery)
     stmt.executeUpdate()
-  } catch (javaSQLException) {
-    throw "<p style=\"color:red\"><b>Problem Deleting SQL Script: " + sqlQueryID + "</b></p>"
+  } catch( javaSQLException ) {
+    let exception = "<p style=\"color:red\"><b>Problem Deleting SQL Script: " + sqlQueryID + "</b></p>\n\n" + javaSQLException
+    return exception
   } finally {
-    if (stmt) try { stmt.close() } catch (e) { print( e ) } 
-    if(connDelete) try { connDelete.close() } catch (e) { print( e ) } // Close db connection
+    if( stmt ) try { stmt.close() } catch (e) { print( e ) } 
+    if( connDelete ) try { connDelete.close() } catch (e) { print( e ) } // Close db connection
   }
 
 }

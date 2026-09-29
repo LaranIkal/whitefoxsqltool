@@ -220,8 +220,9 @@ function DBConnectionDelete( dataSourceID ) {
     try {
       var stmt = connDelete.prepareStatement(dtsDeleteQuery)
       stmt.executeUpdate()
-    } catch (javaSQLException) {
-        throw "<p style=\"color:red\"><b>Problem Running Query to Delete Data Source: " + dtsDeleteQuery + "</b></p>"
+    } catch( javaSQLException ) {
+        let exception = "<p style=\"color:red\"><b>Problem Running Query to Delete Data Source: " + dtsDeleteQuery + "</b></p>\n\n" + javaSQLException
+        return exception
     } finally {
         if (stmt) try { stmt.close()} catch (e) { print( e ) }
         if (connDelete) try { connDelete.close() } catch (e) { print( e ) } // Close connection in the last query.
@@ -261,7 +262,8 @@ function DBConnectionTest( dataSourceID, tableName ) {
         dataSourceScript = resultSet.getString(2)
       }
     } catch (javaSQLException) {
-      throw "<p style=\"color:red\"><b>Problem Running Query to Get Data Source: " + selectQuery + "</b></p>"
+      let exception = "<p style=\"color:red\"><b>Problem Running Query to Get Data Source: " + selectQuery + "</b></p>\n\n" + javaSQLException
+      return exception
     } finally {
       if (resultSet) try { resultSet.close() } catch(e) {}
       if (stmt) try { stmt.close()} catch (e) { print( e ) }
@@ -277,15 +279,17 @@ function DBConnectionTest( dataSourceID, tableName ) {
         var stmt = customConn.prepareStatement(selectQuery)
         var resultSet = stmt.executeQuery()
         if (resultSet.next()) dbConnTestMsg = "DB Connection Test ok, Table Test Count Result: " + resultSet.getInt(1)
-      } catch (javaSQLException) {
-        throw "<p style=\"color:red\"><b>Problem Running Query to Test Data Source: " + selectQuery + "</b></p>"
+      } catch( javaSQLException ) {
+        let exception = "<p style=\"color:red\"><b>Problem Running Query to Test Data Source: " + selectQuery + "</b></p>\n\n" + javaSQLException
+        return exception
       } finally {
           if (resultSet) try { resultSet.close() } catch(e) {}
           if (stmt) try { stmt.close()} catch (e) { print( e ) }
           if (customConn) try { customConn.close()} catch (e) { print( e ) }
       }
-    } catch (javaSQLException) {
-        throw "<p style=\"color:red\"><b>Data Source Connection Script Error, Verify Your Code.</b></p>"
+    } catch( javaSQLException ) {
+        let exception = "<p style=\"color:red\"><b>Data Source Connection Script Error, Verify Your Code.</b></p>\n\n" + javaSQLException
+        return exception
     }
   } // if( dbConnTestMsg == "" ) {
 
