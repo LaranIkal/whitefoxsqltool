@@ -170,3 +170,26 @@ function GetDateTime() {
 }
 
 
+// Closes any number of JDBC resources (Connection, Statement, ResultSet)
+function closeQuietly() {
+  for( var i = 0; i < arguments.length; i++ ) {
+    var resource = arguments[i]
+    if( resource ) {
+      try { resource.close() } catch( error ) { print( "Error closing resource: " + error ) }
+    }
+  }
+}
+
+
+
+function exceptionMsg( exception ) {
+  exception += '\n\n<button onclick="history.back()">Go Back To WhiteFox</button>'
+  response.getWriter().write("<pre>" + exception + "</pre>")
+  response.getWriter().flush()
+}
+
+
+
+
+
+

@@ -13,13 +13,12 @@ function DsMainScreen( dataSourceID ) {
     try {
       var stmt = conn.prepareStatement(selectQuery)
       var resultSet = stmt.executeQuery()
-      if (resultSet.next()) {
+      if( resultSet.next() ) {
         dataSourceName = resultSet.getString(1)
         dataSourceScript = resultSet.getString(2)
       }
     } finally {
-      if( resultSet ) try { resultSet.close() } catch(e) {}
-      if( stmt ) try { stmt.close()} catch (e) { print( e ) }
+      closeQuietly( resultSet, stmt )
     }
   }
 
@@ -90,9 +89,7 @@ function DsMainScreen( dataSourceID ) {
       qtHtml += "<option value=\"" + resultSet.getString(1) + "\">" + resultSet.getString(1) + " - " + resultSet.getString(2) + "</option>\n"
     }
   } finally {
-    if( resultSet ) try { resultSet.close() } catch(e) {}
-    if( stmt ) try { stmt.close()} catch (e) { print( e ) }
-    if( conn ) try { conn.close() } catch (e) { print( e ) } // Close connection in the last query.
+    closeQuietly( resultSet, stmt, conn )
   }
 
   qtHtml += "</select>\n\
@@ -125,8 +122,7 @@ function DBConnectionSave( dataSourceID, dataSourceName, dataSourceScript, valid
       var resultSet = stmt.executeQuery()
       if( resultSet.next() ) numRows = resultSet.getInt(1)
     } finally {
-      if( resultSet ) try { resultSet.close() } catch(e) {}
-      if( stmt ) try { stmt.close()} catch (e) { print( e ) }
+      closeQuietly( resultSet, stmt )
     }
   
     if( numRows > 0 ) error += "Data Source Name Already Exists, Please Enter a Different Name.<br>"
@@ -134,7 +130,6 @@ function DBConnectionSave( dataSourceID, dataSourceName, dataSourceScript, valid
 
   if( dataSourceScript == "" ) error += "Enter Connection Javascript Code For Data Source.<br>"
 
-  var javaSQLException = java.sql.SQLException
   if( error == "" ) {
     dataSourceScript = dataSourceScript.replaceAll("anequalchar", "=")
     dataSourceScript = dataSourceScript.replaceAll("apluschar", "+")
@@ -145,11 +140,11 @@ function DBConnectionSave( dataSourceID, dataSourceName, dataSourceScript, valid
         var customConn = GetCustomDSConnection()
       } catch( javaSQLException ) {
         //error += "Data Source Connection Script Error, Verify Your Code."
-        if( connSave ) try { connSave.close() } catch (e) { print( e ) } // Close db connection
+        closeQuietly( connSave )
         let exception = "Data Source Connection Script Error, Verify Your Code.\n\n" + javaSQLException
         return exception
-      } finally {      
-        if( customConn ) try { customConn.close() } catch (e) { print( e ) } // Close connection
+      } finally {
+        closeQuietly( customConn )
       }
     }
   }
@@ -169,11 +164,11 @@ function DBConnectionSave( dataSourceID, dataSourceName, dataSourceScript, valid
       var stmt = connSave.prepareStatement(dtsInsertQuery)
       stmt.executeUpdate()
     } catch( javaSQLException ) {
-      if(connSave) try { connSave.close() } catch (e) { print( e ) } // Close db connection
+      closeQuietly( connSave )
       let exception = "<p style=\"color:red\"><b>Problem Running Query When Creating/Updating Data Source: " + dtsInsertQuery + "</b></p>\n\n" + javaSQLException
       return exception
     } finally {
-      if( stmt ) try { stmt.close()} catch (e) { print( e ) }        
+      closeQuietly( stmt )
     }
 
     dbConnSaveMsg = "DB Connection Saved, " // Initialize return message.
@@ -186,8 +181,7 @@ function DBConnectionSave( dataSourceID, dataSourceName, dataSourceScript, valid
         var resultSet = stmt.executeQuery()
         if( resultSet.next() ) dataSourceID = resultSet.getString(1)
       } finally {
-        if( resultSet ) try { resultSet.close() } catch(e) {}
-        if( stmt ) try { stmt.close()} catch (e) { print( e ) }
+        closeQuietly( resultSet, stmt )
       }      
       dbConnSaveMsg = "datasourceid="+ dataSourceID + "|" + dbConnSaveMsg + "Reloading Connections List, "
     }
@@ -197,7 +191,7 @@ function DBConnectionSave( dataSourceID, dataSourceName, dataSourceScript, valid
     dbConnSaveMsg = error + "Date/Time: " + GetDateTime() // Utils.GetDateTime
   }
 
-  if (connSave) try { connSave.close() } catch (e) { print( e ) } // Close db connection
+  closeQuietly( connSave )
 
   return(dbConnSaveMsg)
 }
@@ -206,7 +200,6 @@ function DBConnectionSave( dataSourceID, dataSourceName, dataSourceScript, valid
 
 function DBConnectionDelete( dataSourceID ) {
   var dbConnDeleteMsg = ""
-  var javaSQLException = java.sql.SQLException
   
   if( dataSourceID == "" ) { 
     dbConnDeleteMsg += "Select Data Source to Delete."
@@ -217,24 +210,23 @@ function DBConnectionDelete( dataSourceID ) {
       var stmt = connDelete.prepareStatement(dtsDeleteQuery)
       stmt.executeUpdate()
     } catch( javaSQLException ) {
+      closeQuietly( stmt, connDelete )
       let exception = "<p style=\"color:red\"><b>Problem Running Query to Delete Data Source: " + dtsDeleteQuery + "</b></p>\n\n" + javaSQLException
       return exception
     } finally {
-      if( stmt ) try { stmt.close()} catch (e) { print( e ) }
-      if( connDelete ) try { connDelete.close() } catch (e) { print( e ) } // Close connection in the last query.
+      closeQuietly( stmt, connDelete )
     }
 
     dbConnDeleteMsg = "DB Connection Deleted, Reloading Page, Date/Time: " + GetDateTime() // Utils.GetDateTime
   }
 
-  return(dbConnDeleteMsg)
+  return( dbConnDeleteMsg )
 }
 
 
 
 function DBConnectionTest( dataSourceID, tableName ) {
   var dbConnTestMsg = ""
-  var javaSQLException = java.sql.SQLException
   var selectQuery = ""
   var dataSourceName = ""
   var dataSourceScript = ""
@@ -258,12 +250,11 @@ function DBConnectionTest( dataSourceID, tableName ) {
         dataSourceScript = resultSet.getString(2)
       }
     } catch( javaSQLException ) {
+      closeQuietly( resultSet, stmt, dsConn )
       let exception = "<p style=\"color:red\"><b>Problem Running Query to Get Data Source: " + selectQuery + "</b></p>\n\n" + javaSQLException
       return exception
     } finally {
-      if( resultSet ) try { resultSet.close() } catch(e) {}
-      if( stmt ) try { stmt.close()} catch (e) { print( e ) }
-      if( dsConn ) try { dsConn.close()} catch (e) { print( e ) }
+      closeQuietly( resultSet, stmt, dsConn )
     }
 
     // Testing the DataSource Connection
@@ -276,12 +267,11 @@ function DBConnectionTest( dataSourceID, tableName ) {
         var resultSet = stmt.executeQuery()
         if (resultSet.next()) dbConnTestMsg = "DB Connection Test ok, Table Test Count Result: " + resultSet.getInt(1)
       } catch( javaSQLException ) {
+        closeQuietly( resultSet, stmt, customConn )
         let exception = "<p style=\"color:red\"><b>Problem Running Query to Test Data Source: " + selectQuery + "</b></p>\n\n" + javaSQLException
         return exception
       } finally {
-        if( resultSet ) try { resultSet.close() } catch(e) {}
-        if( stmt ) try { stmt.close()} catch (e) { print( e ) }
-        if( customConn ) try { customConn.close()} catch (e) { print( e ) }
+        closeQuietly( resultSet, stmt, customConn )
       }
     } catch( javaSQLException ) {
       let exception = "<p style=\"color:red\"><b>Data Source Connection Script Error, Verify Your Code.</b></p>\n\n" + javaSQLException
