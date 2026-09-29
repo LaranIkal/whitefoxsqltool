@@ -22,10 +22,7 @@ function ExportQueryResults(webPageParams) {
   var useMsXls = new Array("","")
   var useLoXls = new Array("","")
 
-  var javaSQLException = java.sql.SQLException
-  var javaIOException = java.io.IOException
   var selectQuery = ""
-  var dataSourceName = ""
   var dataSourceScript = ""
   var fileData = null
 
@@ -64,11 +61,11 @@ function ExportQueryResults(webPageParams) {
       dataSourceScript = resultSet.getString(2)
     }
   } catch (javaSQLException) {
-    throw "<p style=\"color:red\"><b>Problem Running Query to Get Data Source: " + selectQuery + "</b></p>"
+    closeQuietly( resultSet, stmt, dsConn )
+    let exception = "<p style=\"color:red\"><b>Problem Running Query to Get Data Source: " + selectQuery + "</b></p>" + javaSQLException
+    exceptionMsg(exception)
   } finally {
-    if (resultSet) try { resultSet.close() } catch(e) {}
-    if (stmt) try { stmt.close()} catch (e) { print( e ) }
-    if (dsConn) try { dsConn.close()} catch (e) { print( e ) }
+    closeQuietly( resultSet, stmt, dsConn )
   }
 
   // Getting Database Connection
@@ -77,7 +74,8 @@ function ExportQueryResults(webPageParams) {
   try {
     customConn = GetCustomDSConnection()
   } catch( javaSQLException ) {
-    throw "<p style=\"color:red\"><b>Data Source Connection Script Error, Verify Your Code:</b> " + dataSourceScript + "</p>"
+    let exception = "<p style=\"color:red\"><b>Data Source Connection Script Error, Verify Your Code:</b> " + dataSourceScript + "</p>" + javaSQLException
+    exceptionMsg( exception )
   }
 
   // Get FileName
@@ -96,8 +94,9 @@ function ExportQueryResults(webPageParams) {
 
     var FileWriter = Java.type("java.io.FileWriter")
     fileData = new FileWriter(exportFileName, false) // true appends to file
-  } catch (javaIOException) {
-    throw "<p style=\"color:red\"><b>File Can Not be Created:</b> " + exportFileName + "</p>"
+  } catch( javaIOException ) {
+    let exception = "<p style=\"color:red\"><b>File Can Not be Created:</b> " + exportFileName + "</p>" + javaIOException
+    exceptionMsg( exception )
   }
 
 
@@ -198,17 +197,17 @@ function ExportQueryResults(webPageParams) {
       }
     }
 
-  } catch (javaSQLException) {
-    throw "<p style=\"color:red\"><b>Problem Running Query: " + sqlScript.trim() + "</b><br>Check your query an try again.</br></p>"
+  } catch( javaSQLException ) {
+    closeQuietly( resultSet, stmt, customConn )
+    let exception = "<p style=\"color:red\"><b>Problem Running Query: " + sqlScript.trim() + "</b></p>" + javaSQLException
+    exceptionMsg(exception)
   } finally {
-      if (resultSet) try { resultSet.close() } catch(e) {}
-      if (stmt) try { stmt.close()} catch (e) { print( e ) }
-      if (customConn) try { customConn.close()} catch (e) { print( e ) }
+    closeQuietly( resultSet, stmt, customConn )
   }
 
   fileData.close()
  
-  return(exportFileName)
+  return( exportFileName )
 }
 
 
@@ -284,5 +283,5 @@ function WriteXlsHeader(fileDataWriter){
 
 
 
-ExportQueryResults(webPageParams)
+ExportQueryResults( webPageParams )
 
