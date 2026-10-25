@@ -1,6 +1,11 @@
 2
 ===>>> What is WhiteFox:
-  - A web sql query tool that is based on JSWEBSERVER(https://github.com/LaranIkal/jswebserver) 
+     WhiteFoxSQLTool is a lightweight, full-stack GraalVM JDK and JavaScript architecture tool
+     that allows to run a localized database client natively inside a web browser, it has a minimal but powerful execution engine.
+
+      Based on: https://github.com/LaranIkal/jswebserver
+
+      We have seen that WhiteFoxSQLTool is using 370 MB RAM, vs Dbeaver 670 MB RAM, vs sqldeveloper 870 MB RAM
 
 ===>>> WhiteFox install:
 
