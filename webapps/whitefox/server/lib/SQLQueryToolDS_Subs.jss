@@ -36,18 +36,22 @@ function DsMainScreen( dataSourceID ) {
             <textarea id=\"datasourcescript\" name=\"datasourcescript\">\n"
 
   if( dataSourceScript == "" ) {
-    qtHtml += "function GetCustomDSConnection() {\n"
-    qtHtml += "  var Properties = Java.type(\"java.util.Properties\")\n"
-    qtHtml += "  var properties = new Properties()\n"
-    qtHtml += "  var conn = null\n"
-    qtHtml += "  var Driver = Java.type(\"org.sqlite.JDBC\")\n"
-    qtHtml += "  var driver = new Driver()\n"
-    qtHtml += "  var dburl = \"jdbc:sqlite:data/mydb.sqlite\"\n\n"
-    qtHtml += "  try {\n"
-    qtHtml += "    conn = driver.connect(dburl, properties)\n"
-    qtHtml += "  } catch (e) { print( e ) }\n\n"
-    qtHtml += "  return(conn)\n"
-    qtHtml += "}\n"
+    qtHtml += `
+      function GetCustomDSConnection() {
+        const DriverManager = Java.type("java.sql.DriverManager")
+        const Properties = Java.type("java.util.Properties")
+        const properties = new Properties()
+
+        const dburl = "jdbc:sqlite:data/mydb.sqlite"
+        
+        try {
+          
+        return DriverManager.getConnection(dburl, properties)
+        
+        } catch (e) { print( e ) }
+
+      }
+    `
   } else {
     qtHtml += dataSourceScript
   }

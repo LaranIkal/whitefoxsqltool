@@ -4,82 +4,75 @@
 // also may be used as sample db connection code.
 var getConnection = function(dbType) {
 
+  // Import Java Libraries
+  const DriverManager = Java.type('java.sql.DriverManager')
   var Properties = Java.type("java.util.Properties")
-  var properties = new Properties()
-  var conn = null;
-  // Prepare system environment variable.
-  var System = Java.type("java.lang.System")
+  var properties = new Properties()  
+  var System = Java.type("java.lang.System") // Prepare system environment variable.
   
   // It is assumed you are configuring your database connection 
   // in the environment.
   switch (dbType) {
-    case 'Oracle':
-      var Driver = Java.type("oracle.jdbc.OracleDriver")
-      var driver = new Driver()
+
+    case 'Oracle': {
       var cServer = System.getenv("ORADBSERVER").toString()
       var cPortNumber = System.getenv("ORADBPORT").toString()
       var cDbName = System.getenv("ORADBNAME").toString()        
       var cUserName = System.getenv("ORADBUSER").toString()
       var cPassw = System.getenv("ORADBPASS").toString()
-      
+      properties.setProperty("user", cUserName)
+      properties.setProperty("password", cPassw)
+      const dburl = 'jdbc:oracle:thin:@' + cServer + ':' + cPortNumber + "/" + cDbName   
+
       try {
-        properties.setProperty("user", cUserName)
-        properties.setProperty("password", cPassw)
-        conn = driver.connect("jdbc:oracle:thin:@" + cServer + ":" + cPortNumber + "/" + cDbName, properties)
-        return conn
+        return DriverManager.getConnection(dburl, properties)
       } finally {
 
       }
-      break
-    case 'PostgreSQL':
-      var Driver = Java.type("org.postgresql.Driver")
-      var driver = new Driver()
+    }
+
+    case 'PostgreSQL': {
       var cServer = System.getenv("PSQLDBSERVER").toString()
       var cPortNumber = System.getenv("PSQLDBPORT").toString()
       var cDbName = System.getenv("PSQLDBNAME").toString()        
       var cUserName = System.getenv("PSQLDBUSER").toString()
       var cPassw = System.getenv("PSQLDBPASS").toString()
-      
+      properties.setProperty("user", cUserName)
+      properties.setProperty("password", cPassw)
+      const dburl = "jdbc:postgresql://" + cServer + ":" + cPortNumber + "/" + cDbName
       try {
-        properties.setProperty("user", cUserName)
-        properties.setProperty("password", cPassw)
-        conn = driver.connect("jdbc:postgresql://" + cServer + ":" + cPortNumber + "/" + cDbName, properties)
-        return conn
+        return DriverManager.getConnection(url, properties)
       } finally {
 
       }
-      break;      
-    case 'ApacheDerby':
-      var Driver = Java.type("org.apache.derby.jdbc.ClientDriver")
-      var driver = new Driver()
+    }
+
+    case 'ApacheDerby': {
       var cServer = System.getenv("DERBYDBSERVER").toString()
       var cPortNumber = System.getenv("DERBYDBPORT").toString()
       var cDbName = System.getenv("DERBYDBNAME").toString()        
       //var cUserName = System.getenv("DERBYDBUSER").toString()
       //var cPassw = System.getenv("DERBYDBPASS").toString()
-      
+      const dburl = "jdbc:derby://" + cServer + ":" + cPortNumber + "/" + cDbName + ";create=false"
       try {
-        conn = driver.connect("jdbc:derby://" + cServer + ":" + cPortNumber + "/" + cDbName + ";create=false", properties)
-        return conn
+        return DriverManager.getConnection(dburl, properties)
       } finally {
 
       }   
-      break
-      case 'sqlite':
-        // Create SQLite Connection and return it
-        var Driver = Java.type("org.sqlite.JDBC")
-        var driver = new Driver()
-        //var cDbName = System.getenv("SQLITEDB").toString()
-        var cDbName = config.SQLITEDB
-        try {
-          conn = driver.connect("jdbc:sqlite:" + cDbName, properties)
-          return conn
-        } finally {
-  
-        }   
-        break      
+    }
+
+    case 'sqlite': {
+      // Create SQLite Connection and return it
+      const dburl = 'jdbc:sqlite:' + config.SQLITEDB
+      try {
+        return DriverManager.getConnection(dburl, properties)
+      } finally {
+
+      }   
+    }
+     
     default:
-      return("Invalid DB Type.")
+      return('Invalid DB Type: ' + dbType)
   }
 
 }

@@ -6,7 +6,6 @@ function SQLQueryToolDS(variables, session, response) {
   var varValues = variables.split("&")
   //response.getWriter().write("<pre>" + varValues.join("\n") + "</pre>")
   //response.getWriter().flush()
-  var webPageName = varValues[0].split("/")[1] // First array element has the web page name.
   var dataSourceOption = new Array("","")
   var dataSourceID = new Array("","")
   var dataSourceName = new Array("","")
