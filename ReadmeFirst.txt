@@ -11,12 +11,14 @@
 
   1.- Download and install GraalVM Java JDK 25:
 
-    1.1.- Go to https://www.graalvm.org/downloads/
+    1.1.- Install Java from graalvm(https://www.graalvm.org/), Go to https://github.com/graalvm/graalvm-ce-builds/releases/ 
+            (GraalVM Community Version, we don't need PGO-Profile-Guided Optimization, which comes with the licensed graalVM version)
+            last jss version I used : graalvm-community-25.4.4.1.1+1.1
     1.2.- Select your OS, Windows or Linux from the list.
     1.3.- Download the latest Java JDK 25 version in a ZIP file, normally if you click on the Download button, it will download the ZIP file.
     1.4.- Using the filemanager, navigate to the folder where you downloaded the ZIP file.
     1.5.- Right-click the ZIP file and select Extract All… (or use a tool like 7-Zip/WinRAR).
-          You will have a folder similar to this folder name: graalvm-community-25.3.4.1+1.1
+          You will have a folder similar to this folder name: graalvm-community-25.4.4.1.1+1.1
           To keep the path short, rename folder to:graalvmjdk25
 
     1.6.- Move the folder to a short location, like this: C:\Apps\graalvmjdk25
